@@ -58,7 +58,7 @@ public class Timer : MonoBehaviour
             " Amount of seconds to answer the question " + timerValue+ " And the fill Fraction is"+fillFraction);
     }
 
-    public void CancelTimer()
+    public void ResetTimer()
     {
         timerValue = 0;
     }

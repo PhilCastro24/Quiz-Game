@@ -6,12 +6,18 @@ using UnityEngine.UI;
 
 public class Quiz : MonoBehaviour
 {
+
     [Header("Questions")]
     [SerializeField] List<QuestionSO> Questions = new List<QuestionSO>();
     [SerializeField] TextMeshProUGUI questionText;
+    QuestionSO currentQuestion;
+
 
     [Header("Answers")]
     [SerializeField] GameObject[] answerButtons;
+    int correctAnswerIndex;
+    bool hasAnsweredEarly;
+
 
     [Header("Buttons")]
     [SerializeField] Sprite defaultAnswerSprite;
@@ -20,78 +26,67 @@ public class Quiz : MonoBehaviour
     [Header("Timer-related things")]
     [SerializeField] Image timerImage;
 
+    [Header("Score-related things")]
+    [SerializeField] TextMeshProUGUI scoreText;
+    ScoreKeeper scoreKeeper;
+
     Timer timer;
 
-    int correctAnswerIndex;
-
-    QuestionSO question;
 
 
     void Start()
     {
-        GetNextQuestion();
         timer = FindObjectOfType<Timer>();
+        scoreKeeper = FindObjectOfType<ScoreKeeper>();
     }
 
     void Update()
     {
-        if (timer != null && timerImage != null)
+
+        timerImage.fillAmount = timer.fillFraction;
+
+        if (timer.loadNextQuestion)
         {
-            timerImage.fillAmount = timer.fillFraction;
+            hasAnsweredEarly = false;
+            GetNextQuestion();
+            timer.loadNextQuestion = false;
         }
-        else
+        else if(!hasAnsweredEarly && !timer.isAnsweringQuestion)
         {
-            Debug.Log("Timer wasn´t found");
+            DisplayAnswer(-1);
+            SetButtonState(false);
         }
+        
     }
 
     public void OnAnswerSelected(int index)
     {
-        Image buttonImage;
-
-        if (index == question.GetCorrectAnswer())
-        {
-            questionText.text = "Correct!";
-
-            buttonImage = answerButtons[index].GetComponent<Image>();
-
-            buttonImage.sprite = correctAnswerSprite;
-
-            Debug.Log("Button with Index" + index + "was pressed");
-        }
-        else
-        {
-            correctAnswerIndex = question.GetCorrectAnswer();
-
-            string correctAnswer = question.GetAnswer(correctAnswerIndex);
-
-            questionText.text = "Sorry, the correct answer was: \n" + correctAnswer;
-
-            buttonImage = answerButtons[correctAnswerIndex].GetComponent<Image>();
-
-            buttonImage.sprite = correctAnswerSprite;
-
-            Debug.Log("Button with Index" + index + "was pressed");
-        }
-
+        hasAnsweredEarly = true;
+        DisplayAnswer(index);
         SetButtonState(false);
+        timer.ResetTimer();
+        scoreText.text = "Score: " + scoreKeeper.CalculateScore();
     }
 
     void GetNextQuestion()
     {
-        SetButtonState(true);
-        SetDefaultButtonSprites();
-        DisplayQuestion();
+        if (Questions.Count > 0)
+        {
+            SetButtonState(true);
+            SetDefaultButtonSprites();
+            GetRandomQuestion();
+            DisplayQuestion();
+        }
     }
 
     void DisplayQuestion()
     {
-        questionText.text = question.Getquestion();
+        questionText.text = currentQuestion.Getquestion();
 
         for (int i = 0; i < answerButtons.Length; i++)
         {
             TextMeshProUGUI buttonText = answerButtons[i].GetComponentInChildren<TextMeshProUGUI>();
-            buttonText.text = question.GetAnswer(i);
+            buttonText.text = currentQuestion.GetAnswer(i);
         }
     }
 
@@ -111,6 +106,51 @@ public class Quiz : MonoBehaviour
             Image buttonImage = answerButtons[i].GetComponent<Image>();
 
             buttonImage.sprite = defaultAnswerSprite;
+        }
+    }
+
+    void GetRandomQuestion()
+    {
+        int index = Random.Range(0, Questions.Count);
+        currentQuestion = Questions[index];
+
+        if (Questions.Contains(currentQuestion))
+        {
+            Questions.Remove(currentQuestion);
+        }
+    }
+
+    void DisplayAnswer(int index)
+    {
+        Image buttonImage;
+
+        if (index == currentQuestion.GetCorrectAnswer())
+        {
+            questionText.text = "Correct!";
+
+            buttonImage = answerButtons[index].GetComponent<Image>();
+
+            buttonImage.sprite = correctAnswerSprite;
+
+            scoreKeeper.IncrementCorrectAnswers();
+
+            //Debug.Log("Button with Index" + index + "was pressed");
+        }
+        else
+        {
+            correctAnswerIndex = currentQuestion.GetCorrectAnswer();
+
+            string correctAnswer = currentQuestion.GetAnswer(correctAnswerIndex);
+
+            questionText.text = "Sorry, the correct answer was: " + correctAnswer;
+
+            buttonImage = answerButtons[correctAnswerIndex].GetComponent<Image>();
+
+            buttonImage.sprite = correctAnswerSprite;
+
+            scoreKeeper.GetQuestionSeen();
+
+            //Debug.Log("Button with Index" + index + "was pressed");
         }
     }
 }
