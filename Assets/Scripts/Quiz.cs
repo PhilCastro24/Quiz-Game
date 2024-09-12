@@ -7,8 +7,8 @@ using UnityEngine.UI;
 public class Quiz : MonoBehaviour
 {
 
-    [Header("Questions")]
-    [SerializeField] List<QuestionSO> Questions = new List<QuestionSO>();
+    [Header("questions")]
+    [SerializeField] List<QuestionSO> questions = new List<QuestionSO>();
     [SerializeField] TextMeshProUGUI questionText;
     QuestionSO currentQuestion;
 
@@ -18,21 +18,17 @@ public class Quiz : MonoBehaviour
     int correctAnswerIndex;
     bool hasAnsweredEarly;
 
-
     [Header("Buttons")]
     [SerializeField] Sprite defaultAnswerSprite;
     [SerializeField] Sprite correctAnswerSprite;
 
     [Header("Timer-related things")]
     [SerializeField] Image timerImage;
+    Timer timer;
 
     [Header("Score-related things")]
     [SerializeField] TextMeshProUGUI scoreText;
     ScoreKeeper scoreKeeper;
-
-    Timer timer;
-
-
 
     void Start()
     {
@@ -42,7 +38,6 @@ public class Quiz : MonoBehaviour
 
     void Update()
     {
-
         timerImage.fillAmount = timer.fillFraction;
 
         if (timer.loadNextQuestion)
@@ -51,12 +46,12 @@ public class Quiz : MonoBehaviour
             GetNextQuestion();
             timer.loadNextQuestion = false;
         }
-        else if(!hasAnsweredEarly && !timer.isAnsweringQuestion)
+        else if (!hasAnsweredEarly && !timer.isAnsweringQuestion)
         {
             DisplayAnswer(-1);
             SetButtonState(false);
         }
-        
+
     }
 
     public void OnAnswerSelected(int index)
@@ -65,12 +60,12 @@ public class Quiz : MonoBehaviour
         DisplayAnswer(index);
         SetButtonState(false);
         timer.ResetTimer();
-        scoreText.text = "Score: " + scoreKeeper.CalculateScore();
+        scoreText.text = "Score: " + scoreKeeper.CalculateScore() + "%";
     }
 
     void GetNextQuestion()
     {
-        if (Questions.Count > 0)
+        if (questions.Count > 0)
         {
             SetButtonState(true);
             SetDefaultButtonSprites();
@@ -81,7 +76,7 @@ public class Quiz : MonoBehaviour
 
     void DisplayQuestion()
     {
-        questionText.text = currentQuestion.Getquestion();
+        questionText.text = currentQuestion.GetQuestion();
 
         for (int i = 0; i < answerButtons.Length; i++)
         {
@@ -111,12 +106,12 @@ public class Quiz : MonoBehaviour
 
     void GetRandomQuestion()
     {
-        int index = Random.Range(0, Questions.Count);
-        currentQuestion = Questions[index];
+        int index = Random.Range(0, questions.Count);
+        currentQuestion = questions[index];
 
-        if (Questions.Contains(currentQuestion))
+        if (questions.Contains(currentQuestion))
         {
-            Questions.Remove(currentQuestion);
+            questions.Remove(currentQuestion);
         }
     }
 
@@ -142,13 +137,13 @@ public class Quiz : MonoBehaviour
 
             string correctAnswer = currentQuestion.GetAnswer(correctAnswerIndex);
 
-            questionText.text = "Sorry, the correct answer was: " + correctAnswer;
+            questionText.text = "Sorry, the correct answer was: \n" + correctAnswer;
 
             buttonImage = answerButtons[correctAnswerIndex].GetComponent<Image>();
 
             buttonImage.sprite = correctAnswerSprite;
 
-            scoreKeeper.GetQuestionSeen();
+            scoreKeeper.IncrementQuestionSeen();
 
             //Debug.Log("Button with Index" + index + "was pressed");
         }

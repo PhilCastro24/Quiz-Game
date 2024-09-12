@@ -24,9 +24,7 @@ public class Timer : MonoBehaviour
 
     void UpdateTimer()
     {
-        Debug.Log("UpdateTimer is being executed");
-
-        timerValue -= Time.deltaTime; // timerValue = timerValue -time.deltatime;
+        timerValue -= Time.deltaTime; // timerValue = timerValue - time.deltatime;
 
         if (isAnsweringQuestion)
         {
@@ -54,8 +52,8 @@ public class Timer : MonoBehaviour
             }
         }
 
-        Debug.Log("The current status is "+ isAnsweringQuestion+ 
-            " Amount of seconds to answer the question " + timerValue+ " And the fill Fraction is"+fillFraction);
+        Debug.Log("The current status is " + isAnsweringQuestion +
+            " Amount of seconds to answer the question " + timerValue + " And the fill Fraction is" + fillFraction);
     }
 
     public void ResetTimer()

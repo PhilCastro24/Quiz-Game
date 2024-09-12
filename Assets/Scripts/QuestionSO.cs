@@ -13,7 +13,7 @@ public class QuestionSO : ScriptableObject
     [SerializeField] int correctAnswerIndex;
 
 
-    public string Getquestion()
+    public string GetQuestion()
     {
         return question;
     }

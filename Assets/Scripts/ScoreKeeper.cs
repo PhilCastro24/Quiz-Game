@@ -37,7 +37,7 @@ public class ScoreKeeper : MonoBehaviour
     {
         questionSeen++;
     }
-    // (x/x)*100=z%
+    // (x/y)*100=z%
 
     public int CalculateScore()
     {
